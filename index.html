@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+      <meta charset="utf-8">
+      <title>Fusion Tables layers</title>
+      <style>
+         /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+         #map {
+         height: 100%;
+         }
+         /* Optional: Makes the sample page fill the window. */
+         html, body {
+         height: 100%;
+         margin: 0;
+         padding: 0;
+         }
+      </style>
+   </head>
+   <body>
+      <div id="floating-panel">
+         <p>
+            Select Call Type: 
+            <select id="callType">
+               <option>All Types</option>
+               <option>Alarms</option>
+               <option>Citizen Assist / Service Call</option>
+               <option>Electrical Hazard</option>
+               <option>Elevator / Escalator Rescue</option>
+               <option>Fuel Spill</option>
+               <option>Gas Leak (Natural and LP Gases)</option>
+               <option>HazMat</option>
+               <option>Medical Incident</option>
+               <option>Odor (Strange / Unknown)</option>
+               <option>Other</option>
+               <option>Outside Fire</option>
+               <option>Smoke Investigation (Outside)</option>
+               <option>Structure Fire</option>
+               <option>Traffic Collision</option>
+               <option>Train / Rail Incident</option>
+               <option>Vehicle Fire</option>
+               <option>Water Rescue</option>
+            </select>
+         </p>
+         Response time greater than: 
+         <input type=text id="startTime">
+         </p>
+         Response time less than:
+         <input type=text id="endTime">
+         <input type=button value="Filter" onclick="applyFilter()">
+         </p>
+      </div>
+      <div id="map"></div>
+      <script>
+        var map, layer;
+
+function applyFilter() {
+ var sTime = document.getElementById('startTime').value;
+ var eTime = document.getElementById('endTime').value;
+ var callType = document.getElementById('callType').value;
+
+ var whr = '';
+ if (sTime != '')
+  whr = 'time_to_arrive >= ' + sTime;
+ if (eTime != '') {
+  if (whr == '')
+   whr = ' time_to_arrive <= ' + eTime;
+  else
+   whr = whr + ' AND time_to_arrive <= ' + eTime
+ }
+
+ if (callType != 'All Types') {
+  if (whr == '')
+   whr = 'call_type = \'' + callType + '\'';
+  else
+   whr = whr + ' AND call_type = \'' + callType + '\'';
+ }
+
+ var qry;
+ if (qry == '')
+  qry = {
+   select: '\'Geocodable address\'',
+   from: '1yEClbhbCLUoUtfv6xysOe2drK9sjrI7KYjipX6Jx'
+  };
+ else
+  qry = {
+   select: '\'Geocodable address\'',
+   from: '1yEClbhbCLUoUtfv6xysOe2drK9sjrI7KYjipX6Jx',
+   where: whr
+  };
+
+ layer.setQuery(qry);
+}
+
+function initMap() {
+ map = new google.maps.Map(document.getElementById('map'), {
+  center: {
+   lat: 37.8,
+   lng: -122.4
+  },
+  zoom: 11
+ });
+
+ layer = new google.maps.FusionTablesLayer({
+  query: {
+   select: '\'Geocodable address\'',
+   from: '1yEClbhbCLUoUtfv6xysOe2drK9sjrI7KYjipX6Jx'
+    //where: 'call_type = \'Alarms\''
+  },
+  heatmap: {
+   enabled: false
+  }
+ });
+ layer.setMap(map);
+}
+      </script>
+      <script async defer
+         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC6u-jgpHYwYWYv_TQELoznIfiVnHnoxZQ&callback=initMap"></script>
+   </body>
+</html>
